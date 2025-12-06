@@ -1,0 +1,13 @@
+
+version: '3.8'
+
+services:
+  agent-api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - LLM_BASE_URL=http://host.docker.internal:1234/v1
+      - LLM_MODEL=google/gemma-3n-e4b
+    volumes:
+      - ./data:/app/data
