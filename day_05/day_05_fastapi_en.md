@@ -51,7 +51,7 @@ This leads to the following output in the terminal:
 
 There are many more ways to use this API. For now, just the simplest one. You can build complex APIs, use different endpoints and methods, add authentication and authorization, validate data, generate automated documentation, and so on and so forth...
 
-But now it’s time to do some coding. I won’t show everything here, but you can check out the full code in my repository.
+But now it’s time to do some coding. I won’t show everything here, but you can check out the full code in my [repository](https://github.com/gvtsch/aoc_2025_heist/blob/main/day_05/day_05_fastapi.py).
 
 ## Implementation
 
