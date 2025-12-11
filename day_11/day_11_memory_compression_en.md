@@ -20,7 +20,7 @@ LONG_CONVERSATION = [
     {"turn_id": 9, "agent": "planner", "message": "Good. We go in at 2 AM when the night shift is smallest."},
     {"turn_id": 10, "agent": "hacker", "message": "I'll monitor police frequencies. If they get a call, we abort immediately."},
 ]
-````
+```
 
 You can also torture yourself with the longer conversation of 100 sentences, I'll pass 😉 You'll find the conversation in the repo.
 

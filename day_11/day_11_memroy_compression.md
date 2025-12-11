@@ -166,3 +166,19 @@ Wir haben eine Art hierarchisches Gedächtnis zur Information Compression progra
 Auf der anderen Seite kostet jede Komprimierung anfangs natürlich erstmal je einen LLM-Call. Langfristig wird es effizienter. Und für lokale LLMs mit wenig Speicher ist das oft die einzige Möglichkeit, längere Kontexte zu verarbeiten.
 
 Konkret heißt das für unsere Agenten, sie könnten stundenlang planen, ohne dass das LLM überfordert wird oder wichtige Entscheidungen vergisst.
+
+## Ausblick: Wo geht die Reise hin?
+
+Was wir heute gebaut haben ist erst der Anfang. Memory Compression ist ein mächtiges Werkzeug, aber da geht noch mehr:
+
+**Persistente Erinnerungen:** Die komprimierten Summaries gehören natürlich in die Datenbank! Wir haben ja schon gezeigt, wie wir Konversationen in SQLite speichern. Jetzt kommt einfach eine neue Tabelle für `compressed_memories` dazu, mit Timestamps und Session-IDs. Dann überlebt unser Agent-Gedächtnis auch Server-Neustarts und wir können sogar historische Trends analysieren.
+
+**Semantische Komprimierung:** Statt nur zeitlich zu komprimieren, könnten wir auch thematisch clustern. Alle Diskussionen über "Sicherheitssysteme" in einen Block, "Zeitpläne" in einen anderen. So wird das Gedächtnis nicht nur kleiner, sondern auch strukturierter.
+
+**Adaptive Komprimierung:** Je nach Wichtigkeit unterschiedlich stark komprimieren. Kritische Entscheidungen bleiben detailliert, Smalltalk wird aggressiv gekürzt. Das LLM könnte sogar selbst bewerten, was wichtig ist.
+
+**Multi-Level Hierarchien:** Warum nur eine Ebene? Stunden-Summaries werden zu Tages-Summaries, die wiederum zu Wochen-Summaries. Wie unser Gehirn, das auch in verschiedenen Zeitebenen arbeitet.
+
+**Fehlertoleranz:** Was passiert, wenn die Komprimierung mal daneben geht? Backup-Strategien, Validierung der Summaries, vielleicht sogar mehrere LLMs zur Qualitätskontrolle.
+
+Das Schöne: All das lässt sich mit dem, was wir heute gebaut haben, erweitern. Unser hierarchisches Gedächtnis ist das Fundament für richtig clevere AI-Systeme. Systeme, die nicht nach ein paar Stunden "vergessen" haben, worum es überhaupt ging.
