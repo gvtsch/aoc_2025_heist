@@ -1,5 +1,7 @@
 # Tag 15: Dynamic Agent System - Configuration statt Hardcoding
 
+Der zugehörige Code findet sich in meinem [Repository](https://github.com/gvtsch/aoc_2025_heist/tree/main/day_15). 
+
 An Tag 15 wird es Zeit, unser Multi-Agent System erwachsen werden zu lassen. Bisher haben wir vier Agents hart im Code definiert. Planner, Hacker, Safecracker und Mole, alle fest verdrahtet mit ihren jeweiligen Rollen, Tools und Permissions. Das funktioniert, keine Frage. Aber es lässt sich schlecht skalieren, ist nicht flexibel und es macht A/B Testing nicht unbedingt einfacher.
 
 Stell dir vor, du willst einen fünften Agenten hinzufügen. Oder die System Prompts verschiedener Agenten testen. Oder verschiedene Tool-Kombinationen ausprobieren. Mit hardcoded Agents bedeutet das jedes Mal Code-Änderungen, neue Commits, Deployments. Das ist nervig und fehleranfällig.
