@@ -1,21 +1,5 @@
 # Tag 15: Dynamic Agent System - Configuration statt Hardcoding
 
-> **Quick Start**
-> ```bash
-> # 1. Services starten (OAuth + 3 Tools)
-> ./day_15/start_services.sh
->
-> # 2. LM Studio mit Gemma starten (Port 1234)
-> # Manuell in LM Studio GUI
->
-> # 3. Agent System ausführen
-> python day_15/dynamic_agent_system.py
->
-> # 4. Services stoppen
-> ./day_15/stop_services.sh
-> ```
-> **Wichtig:** Tag 15 benötigt **5 laufende Services** gleichzeitig (OAuth, Calculator, File Reader, Database, LLM)
-
 An Tag 15 wird es Zeit, unser Multi-Agent System erwachsen werden zu lassen. Bisher haben wir vier Agents hart im Code definiert. Planner, Hacker, Safecracker und Mole, alle fest verdrahtet mit ihren jeweiligen Rollen, Tools und Permissions. Das funktioniert, keine Frage. Aber es lässt sich schlecht skalieren, ist nicht flexibel und es macht A/B Testing nicht unbedingt einfacher.
 
 Stell dir vor, du willst einen fünften Agenten hinzufügen. Oder die System Prompts verschiedener Agenten testen. Oder verschiedene Tool-Kombinationen ausprobieren. Mit hardcoded Agents bedeutet das jedes Mal Code-Änderungen, neue Commits, Deployments. Das ist nervig und fehleranfällig.
@@ -442,9 +426,18 @@ Morgen bauen wir darauf auf und integrieren alle Services. Aber das Fundament st
 
 ## Verwendung
 
-1. `./start_services.sh` - Startet OAuth + 3 Tool Services
-2. LM Studio manuell starten (Port 1234)
-3. `python dynamic_agent_system.py` - Führt Agent Conversation aus
-4. `./stop_services.sh` - Stoppt alle Services
-
-**Service Logs:** `/tmp/*_service.log`
+> **Quick Start**
+> ```bash
+> # 1. Services starten (OAuth + 3 Tools)
+> ./day_15/start_services.sh
+>
+> # 2. LM Studio mit Gemma starten (Port 1234)
+> # Manuell in LM Studio GUI
+>
+> # 3. Agent System ausführen
+> python day_15/dynamic_agent_system.py
+>
+> # 4. Services stoppen
+> ./day_15/stop_services.sh
+> ```
+> **Wichtig:** Tag 15 benötigt **5 laufende Services** gleichzeitig (OAuth, Calculator, File Reader, Database, LLM)
