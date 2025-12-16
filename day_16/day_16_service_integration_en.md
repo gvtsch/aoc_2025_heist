@@ -1,4 +1,15 @@
-# Day 16: Service Integration
+---
+title: "Day 16: Service Integration"
+date: 2025-12-16
+tags:
+  - python
+  - aoc
+  - adventofcode
+  - aiagents
+toc: true
+---
+
+You can find all files in my [repository](https://github.com/gvtsch/aoc_2025_heist/tree/main/day_16).
 
 Day 16 brings everything together. We now have individual building blocks: OAuth for security, Tools for specialization, Memory Service for context management, SQLite for persistence, and Dynamic Agents from configuration files. Everything works in isolation. But that's not enough for us. We want an integrated system where all components work together.
 
