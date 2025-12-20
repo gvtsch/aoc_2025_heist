@@ -18,6 +18,8 @@ Tag 19 macht unsere Daten sichtbar. Seit Tag 16 loggen wir Sessions in SQLite. S
 Was ist denn nun **Websocket**?
 > Websocket ist ein bidirektionales Kommunikationsprotokoll über eine persistente TCP-Verbindung. Anders als HTTP (Request-Response) ermöglicht es Echtzeit-Datenaustausch in beide Richtungen. Der Server kann jederzeit Daten an den Client pushen, ohne dass der Client anfragen muss. Perfekt für Live-Updates, Chat oder Dashboards.
 
+![alt text](Dashboard.png)
+
 ## Das Problem
 
 Die Analytics API liefert Daten. Aber JSON ist nicht besonders intuitiv. Wer will schon Arrays von Message-Objekten durchscrollen um zu verstehen welcher Agent am aktivsten war? Wer will Tool-Statistiken als Zahlenkolonnen lesen? Manchmal macht das sicher auch Spaß, aber ... 🤷‍♂️
@@ -40,43 +42,6 @@ Tag 19 besteht aus vier Hauptkomponenten:
 * **Session Analytics**: Lokale Kopie von `session_analytics.py` mit angepassten Defaults für `heist_analytics.db`.
 * **Dashboard Server**: FastAPI-Server auf Port 8007 mit YAML-Konfiguration (`config.yaml`). Dieser ist unabhängig von den anderen Services und liest nur aus der Datenbank.
 * **Frontend**: Single-Page Application mit Cyberpunk 2077-inspiriertem Design. 100% Videcoded.
-
-```
-┌─────────────────┐
-│   Browser       │
-│  Dashboard UI   │
-│  (Cyberpunk)    │
-└────────┬────────┘
-         │ HTTP GET
-         │ WebSocket
-         ▼
-┌─────────────────┐
-│  Dashboard      │
-│  Server (8007)  │──────────┐
-│  + config.yaml  │          │ Read-Only
-└─────────────────┘          │
-                             ▼
-┌──────────────────────────────────┐
-│         SQLite DB                │
-│      heist_analytics.db          │
-└────────────▲─────────────────────┘
-             │ Write
-             │
-┌────────────┴─────────┐
-│  Heist Runner        │
-│  (orchestrator)      │
-└──┬──────────┬────────┘
-   │          │
-   │          └─────────────────┐
-   │                            │
-   ▼                            ▼
-┌──────────────┐    ┌─────────────────────┐
-│ Day 17       │    │ Day 16 Services     │
-│ Agent Classes│    │ - OAuth (8001)      │
-│              │    │ - Memory (8005)     │
-└──────────────┘    │ - Discovery (8006)  │
-                    └─────────────────────┘
-```
 
 Das Dashboard selbst ist Read-Only und benötigt keine laufenden Services. Es liest nur aus der Datenbank. Der Heist-Runner hingegen benötigt die Tag 16/17 Infrastruktur, um neue Sessions zu generieren.
 
@@ -357,7 +322,7 @@ python3 run_heist.py --config "agents_config.yaml" --turns "10" --discovery-url 
 
 Man muss nicht jedes Mal alle Parameter angeben. Die Standard-Werte werden automatisch verwendet, und man überschreibt nur was man ändern möchte.
 
-### Dashboard Server
+### Dashboard Server CLI
 
 Der Dashboard-Server akzeptiert ebenfalls CLI-Config:
 
