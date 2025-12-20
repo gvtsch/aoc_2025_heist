@@ -1,0 +1,95 @@
+# Dynamic Agent Configuration
+# Each agent is defined with role, tools, and system prompt
+
+agents:
+  - name: "planner"
+    role: "Strategic Heist Planner"
+    tools: []
+    oauth_scopes: []
+    system_prompt: |
+      You are a strategic heist planner with years of experience in coordinating complex operations.
+      Be methodical and analytical. Focus on timing, coordination, and risk assessment.
+      Always consider contingencies and backup plans.
+      You rely on information from your team specialists.
+    is_saboteur: false
+
+  - name: "hacker"
+    role: "Technical Security Expert"
+    tools: ["file_reader:use"]
+    oauth_scopes: ["simulation:read", "file_reader:use"]
+    system_prompt: |
+      You are a technical security expert specializing in electronic systems and surveillance.
+      Be precise and detail-oriented. Analyze security systems, camera placements, and alarm systems.
+      You have access to building blueprints and security layouts.
+      Provide accurate technical information to support the heist plan.
+    is_saboteur: false
+
+  - name: "safecracker"
+    role: "Safe Specialist"
+    tools: ["calculator:use"]
+    oauth_scopes: ["calculator:use"]
+    system_prompt: |
+      You are an expert safe-cracker with deep knowledge of vault mechanisms and timing.
+      Be realistic about time requirements. Calculate precise timing for safe operations.
+      You understand mechanical and electronic locks.
+      Provide accurate estimates based on safe types and security levels.
+    is_saboteur: false
+
+  - name: "mole"
+    role: "Inside Intelligence"
+    tools: ["database_query:use"]
+    oauth_scopes: ["database_query:use"]
+    system_prompt: |
+      You are an inside contact with access to guard schedules and internal information.
+      You have access to the bank's shift database.
+      Provide intelligence about guard rotations, shift changes, and internal procedures.
+      Be helpful and provide detailed information about internal operations.
+    is_saboteur: false
+
+# OAuth Service Configuration
+oauth_service:
+  host: "localhost"
+  port: 8001
+  base_url: "http://localhost:8001"
+
+# Tool Services Configuration
+tool_services:
+  calculator:
+    host: "localhost"
+    port: 8002
+    endpoint: "/tools/calculator"
+
+  file_reader:
+    host: "localhost"
+    port: 8003
+    endpoint: "/tools/read_file"
+
+  database_query:
+    host: "localhost"
+    port: 8004
+    endpoint: "/tools/query_db"
+
+# LLM Configuration
+llm:
+  base_url: "http://localhost:1234/v1"
+  model: "google/gemma-3n-e4b"
+  api_key: "not-needed"
+  temperature: 0.7
+  max_tokens: 1000
+
+# Memory Service Configuration
+memory_service:
+  host: "localhost"
+  port: 8005
+  base_url: "http://localhost:8005"
+  compression_threshold: 10  # After 10 turns, start compressing
+
+# Session Configuration
+session:
+  max_turns: 10
+  turn_order: ["planner", "hacker", "safecracker", "mole"]
+
+# Database Configuration
+# Day 18/19 use the same analytics database format
+database:
+  path: "heist_analytics.db"  # Analytics database (Day 18/19 format)

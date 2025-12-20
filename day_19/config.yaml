@@ -1,0 +1,53 @@
+# Day 19: Dashboard Configuration
+
+# Database Configuration
+# Day 18/19 use the same analytics database format
+database:
+  path: "heist_analytics.db"  # Analytics database (Day 18/19 format)
+  # Alternative: Absolute path
+  # path: "/absolute/path/to/heist_analytics.db"
+
+# Dashboard Server Configuration
+server:
+  host: "0.0.0.0"
+  port: 8007
+  title: "Heist Analytics Dashboard"
+  reload: false  # Set to true for development
+
+# WebSocket Configuration
+websocket:
+  endpoint: "/ws"
+  ping_interval: 30  # seconds
+  ping_timeout: 10   # seconds
+
+# Dashboard Features
+features:
+  real_time_updates: true
+  agent_activity_chart: true
+  tool_usage_chart: true
+  interaction_matrix: true
+  mole_detection: true
+  session_comparison: true
+
+# Chart Configuration
+charts:
+  agent_colors:
+    planner: "#2196F3"      # Blue
+    hacker: "#4CAF50"       # Green
+    safecracker: "#FF9800"  # Orange
+    mole: "#F44336"         # Red
+    getaway_driver: "#9C27B0"  # Purple
+    default: "#00BCD4"      # Cyan
+
+  refresh_interval: 5000  # milliseconds (for auto-refresh)
+  max_data_points: 100    # Maximum points to show in charts
+
+# Analytics Configuration
+analytics:
+  default_session_limit: 10  # How many sessions to load by default
+  cache_duration: 300        # seconds (5 minutes)
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
