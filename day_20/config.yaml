@@ -1,0 +1,28 @@
+# Day 20: Interactive Dashboard Configuration
+
+# Database Configuration
+database:
+  path: "../heist_analytics.db"  # Shared analytics database in root directory
+
+# Dashboard Server Configuration
+server:
+  host: "0.0.0.0"
+  port: 8008
+  title: "Interactive Heist Command Center"
+  reload: false
+
+# Chart Configuration
+charts:
+  agent_colors:
+    planner: "#00ffff"     # Cyan
+    hacker: "#00ff00"       # Neon Green
+    safecracker: "#ffff00"  # Yellow
+    mole: "#ff00ff"         # Magenta
+
+# Interactive Features
+features:
+  heist_control: true      # Enable pause/resume controls
+  agent_commands: true     # Enable command injection
+  bank_layout: true        # Enable interactive bank layout
+  mole_detection: true     # Enable mole detection game
+  activity_log: true       # Enable activity logging
