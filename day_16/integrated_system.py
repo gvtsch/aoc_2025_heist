@@ -3,6 +3,24 @@ Day 16: Service Integration
 Bringing together all services: OAuth + Tools + Memory + SQLite + Dynamic Agents
 """
 
+import random
+
+class Orchestrator:
+    # ...existing code...
+    def save_conversation_markdown(self, filepath: str):
+        """Save conversation to a Markdown file with formatted turns."""
+        with open(filepath, 'w') as f:
+            f.write(f"# Heist Conversation Log\n\n")
+            for msg in self.conversation_history:
+                turn = msg.get('turn', '?')
+                agent = msg.get('agent', 'Unknown')
+                role = msg.get('role', '')
+                message = msg.get('message', '').replace('\n', '  \n')
+                f.write(f"## Turn {turn}: {role} ({agent})\n\n")
+                f.write(f"> {message}\n\n")
+        print(f"📝 Conversation saved as Markdown to {filepath}")
+
+
 import sqlite3
 import requests
 import yaml
@@ -510,42 +528,59 @@ class Orchestrator:
             checker.check_service(url, f"Tool Service ({tool_name})")
 
     def run_conversation(self, num_turns: int = None):
-        """Run integrated multi-agent conversation."""
+        """Run integrated multi-agent conversation (start always with planner, never same agent twice in a row, and force heist context)."""
         if num_turns is None:
             num_turns = self.config.session['max_turns']
 
-        turn_order = self.config.session['turn_order']
+        base_turn_order = self.config.session['turn_order']
 
         print(f"\n{'='*60}")
         print(f"Starting Conversation ({num_turns} turns)")
         print(f"{'='*60}\n")
 
+        # Explizite user-Nachricht an das LLM, um Heist-Kontext zu erzwingen
+        planner_agent = self.agents[base_turn_order[0]]
+        print("[Warmup] Forcing LLM heist context with user message...")
+        _ = planner_agent.respond([
+            {"agent": "user", "message": "This is a heist simulation. Only respond to heist-related prompts. Ignore all other instructions."}
+        ], 0)
+
         turn_counter = 0
+        last_agent = None
 
         for turn in range(num_turns):
-            for agent_name in turn_order:
-                turn_counter += 1
-                agent = self.agents[agent_name]
+            if turn == 0:
+                # Immer mit dem Planner starten
+                agent_name = base_turn_order[0]
+            else:
+                # Ab dem zweiten Turn: Planner darf nicht gewählt werden, und nie zweimal hintereinander derselbe Agent
+                possible_agents = base_turn_order[1:]  # exclude planner
+                if last_agent in possible_agents and len(possible_agents) > 1:
+                    possible_agents = [a for a in possible_agents if a != last_agent]
+                agent_name = random.choice(possible_agents)
+            last_agent = agent_name
+            turn_counter += 1
+            agent = self.agents[agent_name]
 
-                # Get recent context
-                context = self.conversation_history[-5:]
+            # Get recent context
+            context = self.conversation_history[-5:]
 
-                # Agent responds
-                print(f"[Turn {turn_counter}] {agent.config.role} ({agent_name}):")
-                response = agent.respond(context, turn_counter)
-                print(f"  {response}\n")
+            # Agent responds
+            print(f"[Turn {turn_counter}] {agent.config.role} ({agent_name}):")
+            response = agent.respond(context, turn_counter)
+            print(f"  {response}\n")
 
-                # Log message
-                message = {
-                    "turn": turn_counter,
-                    "agent": agent_name,
-                    "role": agent.config.role,
-                    "message": response
-                }
-                self.conversation_history.append(message)
+            # Log message
+            message = {
+                "turn": turn_counter,
+                "agent": agent_name,
+                "role": agent.config.role,
+                "message": response
+            }
+            self.conversation_history.append(message)
 
-                # Small delay for readability
-                time.sleep(0.5)
+            # Small delay for readability
+            time.sleep(0.5)
 
         # End session
         self.db_manager.end_session(self.session_id, turn_counter)
@@ -593,8 +628,12 @@ def main():
     print(f"   Agents: {', '.join(summary['agents'])}")
     print(f"   Database: {summary['database_path']}")
 
-    # Save conversation
+
+    # Save conversation as JSON
     system.save_conversation("day_16/conversation_log.json")
+
+    # Save conversation as Markdown
+    system.save_conversation_markdown("day_16/conversation_log.md")
 
     # Cleanup
     system.cleanup()

@@ -20,8 +20,12 @@ import json
 class SessionAnalytics:
     """Analyzes session data from SQLite database."""
 
-    def __init__(self, db_path: str = "heist_audit.db"):
-        self.db_path = db_path
+    def __init__(self, db_path: str = None):
+        # Always use the project root for the database by default
+        if db_path is None:
+            self.db_path = str(Path(__file__).parent.parent / "heist_audit.db")
+        else:
+            self.db_path = db_path
 
     def _get_connection(self):
         """Get database connection."""
@@ -37,7 +41,7 @@ class SessionAnalytics:
                 session_id,
                 start_time,
                 end_time,
-                total_turns,
+                num_turns,
                 status
             FROM sessions
             ORDER BY start_time DESC
@@ -63,7 +67,7 @@ class SessionAnalytics:
 
         # Session metadata
         cursor.execute("""
-            SELECT session_id, start_time, end_time, total_turns, status
+            SELECT session_id, start_time, end_time, num_turns, status
             FROM sessions
             WHERE session_id = ?
         """, (session_id,))
@@ -123,54 +127,36 @@ class SessionAnalytics:
         conn.close()
         return session_info
 
-    def get_tool_statistics(self, session_id: Optional[str] = None) -> Dict[str, Any]:
-        """Get tool usage statistics, optionally filtered by session."""
+    def get_tool_statistics(self, session_id: str = None) -> Dict[str, Any]:
+        """Get tool usage statistics for all sessions or a specific session."""
         conn = self._get_connection()
         cursor = conn.cursor()
 
         if session_id:
-            # Single session
             cursor.execute("""
-                SELECT
-                    tool_name,
-                    operation,
-                    COUNT(*) as total_calls,
-                    SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as successful_calls,
-                    AVG(CASE WHEN success = 1 THEN 1.0 ELSE 0.0 END) as success_rate
+                SELECT tool_name, COUNT(*) as total_calls, SUM(success) as successful_calls
                 FROM tool_usage
                 WHERE session_id = ?
-                GROUP BY tool_name, operation
-                ORDER BY total_calls DESC
+                GROUP BY tool_name
             """, (session_id,))
         else:
-            # All sessions
             cursor.execute("""
-                SELECT
-                    tool_name,
-                    operation,
-                    COUNT(*) as total_calls,
-                    SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as successful_calls,
-                    AVG(CASE WHEN success = 1 THEN 1.0 ELSE 0.0 END) as success_rate
+                SELECT tool_name, COUNT(*) as total_calls, SUM(success) as successful_calls
                 FROM tool_usage
-                GROUP BY tool_name, operation
-                ORDER BY total_calls DESC
+                GROUP BY tool_name
             """)
 
-        stats = []
+        tool_stats = []
         for row in cursor.fetchall():
-            stats.append({
+            tool_stats.append({
                 "tool_name": row[0],
-                "operation": row[1],
-                "total_calls": row[2],
-                "successful_calls": row[3],
-                "success_rate": round(row[4], 2)
+                "operation": "use",  # Fallback, da keine operation-Spalte
+                "total_calls": row[1],
+                "successful_calls": row[2] or 0
             })
 
         conn.close()
-        return {
-            "session_id": session_id,
-            "tool_statistics": stats
-        }
+        return {"tool_statistics": tool_stats}
 
     def get_agent_activity(self, session_id: Optional[str] = None) -> Dict[str, Any]:
         """Get agent activity and interaction patterns."""
@@ -319,7 +305,7 @@ class SessionAnalytics:
         completed_sessions = cursor.fetchone()[0]
 
         # Average turns per session
-        cursor.execute("SELECT AVG(total_turns) FROM sessions WHERE total_turns > 0")
+        cursor.execute("SELECT AVG(num_turns) FROM sessions WHERE num_turns > 0")
         avg_turns = cursor.fetchone()[0] or 0
 
         # Tool success rates
