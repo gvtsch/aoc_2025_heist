@@ -117,6 +117,7 @@ def run_controlled_heist_demo():
         agent = IntegratedAgentWithController(
             config=agent_config,
             llm_client=llm_client,
+            llm_config=config.llm,
             oauth_client=oauth_client,
             tool_client=tool_client,
             memory_client=memory_client,

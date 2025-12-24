@@ -361,6 +361,7 @@ class IntegratedAgent:
         self,
         config: AgentConfig,
         llm_client: OpenAI,
+        llm_config: Dict[str, Any],
         oauth_client: OAuthClient,
         tool_client: ToolClient,
         memory_client: MemoryServiceClient,
@@ -369,6 +370,7 @@ class IntegratedAgent:
     ):
         self.config = config
         self.llm_client = llm_client
+        self.llm_config = llm_config
         self.oauth_client = oauth_client
         self.tool_client = tool_client
         self.memory_client = memory_client
@@ -383,10 +385,82 @@ class IntegratedAgent:
                 self.config.oauth_scopes
             )
 
+    def _get_tool_instructions(self) -> str:
+        """Generate tool usage instructions based on available tools."""
+        if not self.config.tools:
+            return ""
+
+        tool_descriptions = {
+            "calculator:use": "calculator - Perform calculations. Usage: [TOOL:calculator:expression] Example: [TOOL:calculator:15*60]",
+            "file_reader:use": "file_reader - Read files. Usage: [TOOL:file_reader:filename] Example: [TOOL:file_reader:vault_specs.txt]",
+            "database_query:use": "database_query - Query database. Usage: [TOOL:database_query:query] Example: [TOOL:database_query:SELECT * FROM guards WHERE shift='night']"
+        }
+
+        available_tools = []
+        for tool in self.config.tools:
+            if tool in tool_descriptions:
+                available_tools.append(tool_descriptions[tool])
+
+        if not available_tools:
+            return ""
+
+        return "\n\nAvailable Tools:\n" + "\n".join(f"- {desc}" for desc in available_tools) + "\n\nTo use a tool, include the [TOOL:name:parameter] pattern in your response."
+
+    def _process_tool_calls(self, response: str, turn_id: int) -> str:
+        """Process tool calls in response and execute them."""
+        import re
+
+        # Pattern: [TOOL:tool_name:parameter]
+        tool_pattern = r'\[TOOL:(\w+):([^\]]+)\]'
+
+        def replace_tool_call(match):
+            tool_name = match.group(1)
+            parameter = match.group(2)
+
+            # Map tool name to config format
+            tool_key = f"{tool_name}:use"
+            if tool_key not in self.config.tools:
+                return f"[Error: Tool '{tool_name}' not available]"
+
+            # Execute tool
+            if tool_name == "calculator":
+                result = self.tool_client.call_tool("calculator", self.oauth_token, expression=parameter)
+            elif tool_name == "file_reader":
+                result = self.tool_client.call_tool("file_reader", self.oauth_token, filename=parameter)
+            elif tool_name == "database_query":
+                result = self.tool_client.call_tool("database_query", self.oauth_token, query=parameter)
+            else:
+                result = {"error": f"Unknown tool: {tool_name}"}
+
+            # Log tool usage
+            success = "error" not in result
+            result_str = str(result.get("result", result.get("error", "Unknown error")))
+
+            self.db_manager.store_tool_usage(
+                self.session_id,
+                turn_id,
+                self.config.name,
+                tool_name,
+                parameter,
+                result_str,
+                success
+            )
+
+            # Return formatted result
+            if success:
+                return f"[{tool_name} result: {result_str}]"
+            else:
+                return f"[{tool_name} error: {result_str}]"
+
+        # Replace all tool calls with results
+        processed = re.sub(tool_pattern, replace_tool_call, response)
+        return processed
+
     def respond(self, context: List[Dict[str, str]], turn_id: int) -> str:
-        """Generate response with full service integration."""
+        """Generate response with full service integration and tool calling."""
         # Build messages with system prompt
-        messages = [{"role": "system", "content": self.config.system_prompt}]
+        system_content = self.config.system_prompt + self._get_tool_instructions()
+        messages = [{"role": "system", "content": system_content}]
 
         # Add conversation context
         for msg in context:
@@ -395,27 +469,25 @@ class IntegratedAgent:
                 "content": f"[{msg['agent']}]: {msg['message']}"
             })
 
-        # Add tool availability
-        if self.config.tools:
-            tool_info = f"\n\nAvailable tools: {', '.join(self.config.tools)}"
-            messages.append({"role": "system", "content": tool_info})
-
         # Get LLM response
         try:
             response = self.llm_client.chat.completions.create(
-                model="llama-3.1-8b-instruct",
+                model=self.llm_config['model'],
                 messages=messages,
-                temperature=0.7,
-                max_tokens=500
+                temperature=self.llm_config.get('temperature', 0.7),
+                max_tokens=self.llm_config.get('max_tokens', 500)
             )
 
-            message = response.choices[0].message.content
+            raw_message = response.choices[0].message.content
+
+            # Process any tool calls in the response
+            processed_message = self._process_tool_calls(raw_message, turn_id)
 
             # Store in Memory Service
             self.memory_client.store_memory(
                 self.config.name,
                 turn_id,
-                message,
+                processed_message,
                 self.session_id
             )
 
@@ -425,10 +497,10 @@ class IntegratedAgent:
                 turn_id,
                 self.config.name,
                 self.config.role,
-                message
+                processed_message
             )
 
-            return message
+            return processed_message
 
         except Exception as e:
             error_msg = f"Error generating response: {e}"
@@ -490,6 +562,7 @@ class Orchestrator:
             agent = IntegratedAgent(
                 agent_config,
                 self.llm_client,
+                self.config.llm,
                 self.oauth_client,
                 self.tool_client,
                 self.memory_client,

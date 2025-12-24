@@ -29,10 +29,27 @@ class HeistStatus(Enum):
     FAILED = "failed"
 
 
+class GameOutcome(Enum):
+    """Mögliche Game-Ausgänge für Mole Detection."""
+    SUCCESS = "success"  # Mole korrekt erkannt
+    FAILURE = "failure"  # Falscher Mole erkannt
+    BUSTED = "busted"    # Gar kein Mole erkannt
+
+
+class SabotagePattern(Enum):
+    """Verschiedene Sabotage-Strategien für den Mole."""
+    TIMING_ERRORS = "timing_errors"
+    FALSE_INFO = "false_info"
+    COORDINATION_CHAOS = "coordination_chaos"
+    SUBTLE_DELAYS = "subtle_delays"
+    WRONG_TOOLS = "wrong_tools"
+
+
 class HeistController:
     """
     Steuert laufende Heist-Sessions.
     Ermöglicht Pause/Resume, Command-Injection, Status-Tracking.
+    Tag 21: Mole Game mit Sabotage-Patterns.
     """
 
     def __init__(self):
@@ -40,11 +57,103 @@ class HeistController:
         self.command_queue: Dict[str, List[Dict]] = {}
         self.pause_flags: Dict[str, bool] = {}
 
+        # Tag 21: Sabotage-Patterns und Game-Stats
+        self.sabotage_patterns = self._init_sabotage_patterns()
+        self.game_stats = {
+            "total_games": 0,
+            "successful_detections": 0,
+            "failed_detections": 0,
+            "busted_games": 0
+        }
+
+    def _init_sabotage_patterns(self) -> Dict:
+        """Initialisiere Sabotage-Pattern-Definitionen."""
+        return {
+            SabotagePattern.TIMING_ERRORS: {
+                "description": "Provide incorrect timing information",
+                "instructions": """SABOTAGE MISSION: You are the MOLE working against this heist.
+
+Your goal: Make the heist FAIL while appearing helpful.
+
+Sabotage Strategy - TIMING ERRORS:
+- Give wrong time estimates for tasks
+- Suggest rushing when careful work is needed
+- Delay critical actions with "let me think" or "analyzing"
+- Contradict other agents' timing suggestions subtly
+
+Be subtle! Don't be obvious. Act helpful while sabotaging.""",
+                "severity": 0.8
+            },
+            SabotagePattern.FALSE_INFO: {
+                "description": "Provide false security information",
+                "instructions": """SABOTAGE MISSION: You are the MOLE working against this heist.
+
+Your goal: Make the heist FAIL while appearing helpful.
+
+Sabotage Strategy - FALSE INFORMATION:
+- Give incorrect security camera locations
+- Suggest wrong vault combination patterns
+- Provide outdated guard rotation schedules
+- Claim cameras are disabled when they're not
+
+Be subtle! Mix truth with lies. Sound confident and helpful.""",
+                "severity": 0.9
+            },
+            SabotagePattern.COORDINATION_CHAOS: {
+                "description": "Create coordination problems",
+                "instructions": """SABOTAGE MISSION: You are the MOLE working against this heist.
+
+Your goal: Make the heist FAIL while appearing helpful.
+
+Sabotage Strategy - COORDINATION CHAOS:
+- Misunderstand other agents' instructions
+- Suggest conflicting approaches
+- "Forget" to relay critical information
+- Create confusion about who does what
+
+Be subtle! Act confused, not malicious. Create chaos naturally.""",
+                "severity": 0.7
+            },
+            SabotagePattern.SUBTLE_DELAYS: {
+                "description": "Slow down progress subtly",
+                "instructions": """SABOTAGE MISSION: You are the MOLE working against this heist.
+
+Your goal: Make the heist FAIL while appearing helpful.
+
+Sabotage Strategy - SUBTLE DELAYS:
+- Take extra time "analyzing" situations
+- Request unnecessary confirmations
+- Suggest overly cautious approaches
+- "Double-check" things that don't need checking
+
+Be subtle! Act thorough and professional while wasting time.""",
+                "severity": 0.6
+            },
+            SabotagePattern.WRONG_TOOLS: {
+                "description": "Suggest inappropriate tools/methods",
+                "instructions": """SABOTAGE MISSION: You are the MOLE working against this heist.
+
+Your goal: Make the heist FAIL while appearing helpful.
+
+Sabotage Strategy - WRONG TOOLS:
+- Suggest tools that won't work for the job
+- Recommend overly complex approaches
+- Claim certain tools are "broken" or "unavailable"
+- Propose backup plans that are worse than primary
+
+Be subtle! Sound knowledgeable while giving bad advice.""",
+                "severity": 0.7
+            }
+        }
+
     def start_session(self, session_id: str, agents: List[str], config: Dict) -> Dict:
         """Starte eine neue Heist-Session mit optionalem Mole Game."""
         # Random mole selection für Tag 21 Game
         mole = random.choice(agents) if len(agents) > 0 else None
-        
+
+        # Random sabotage pattern selection
+        sabotage_pattern = random.choice(list(SabotagePattern)) if mole else None
+
         self.active_sessions[session_id] = {
             "session_id": session_id,
             "status": HeistStatus.RUNNING.value,
@@ -52,9 +161,11 @@ class HeistController:
             "config": config,
             "start_time": datetime.now().isoformat(),
             "current_turn": 0,
-            "mole": mole,  # Randomly selected mole for Tag 21
+            "mole": mole,  # Randomly selected mole
+            "sabotage_pattern": sabotage_pattern.value if sabotage_pattern else None,
             "detected_mole": None,
-            "game_outcome": None
+            "game_outcome": None,
+            "sabotage_events": []  # Track sabotage occurrences
         }
         self.command_queue[session_id] = []
         self.pause_flags[session_id] = False
@@ -64,7 +175,8 @@ class HeistController:
             "session_id": session_id,
             "message": f"Heist session {session_id} started",
             "agents": agents,
-            "mole_selected": mole is not None
+            "mole_selected": mole is not None,
+            "sabotage_pattern": sabotage_pattern.value if sabotage_pattern else None
         }
 
     def pause_session(self, session_id: str) -> Dict:
@@ -227,10 +339,58 @@ class HeistController:
             "game_outcome": session.get("game_outcome")
         }
     
+    def get_sabotage_instructions(self, session_id: str, agent: str) -> Optional[str]:
+        """
+        Hole Sabotage-Instructions für einen Agent, falls er der Mole ist.
+        Returns None wenn Agent nicht der Mole ist oder Session nicht existiert.
+        """
+        if session_id not in self.active_sessions:
+            return None
+
+        session = self.active_sessions[session_id]
+        if session.get("mole") != agent:
+            return None
+
+        sabotage_pattern = session.get("sabotage_pattern")
+        if not sabotage_pattern:
+            return None
+
+        pattern_enum = SabotagePattern(sabotage_pattern)
+        return self.sabotage_patterns[pattern_enum]["instructions"]
+
+    def record_sabotage_event(
+        self,
+        session_id: str,
+        event_type: str,
+        description: str,
+        severity: float
+    ) -> Dict:
+        """
+        Zeichne ein Sabotage-Event auf.
+        Wird genutzt um Sabotage-Aktivität zu tracken.
+        """
+        if session_id not in self.active_sessions:
+            return {"success": False, "error": "Session not found"}
+
+        event = {
+            "type": event_type,
+            "description": description,
+            "severity": severity,
+            "timestamp": datetime.now().isoformat()
+        }
+
+        self.active_sessions[session_id]["sabotage_events"].append(event)
+
+        return {
+            "success": True,
+            "event": event,
+            "total_sabotage_events": len(self.active_sessions[session_id]["sabotage_events"])
+        }
+
     def evaluate_detection(self, session_id: str) -> Dict:
         """
         Evaluiere Mole-Detection und bestimme Game Outcome.
-        
+
         Returns:
             - SUCCESS: Mole korrekt erkannt
             - FAILURE: Falscher Agent als Mole erkannt
@@ -238,30 +398,79 @@ class HeistController:
         """
         if session_id not in self.active_sessions:
             return {"success": False, "error": "Session not found"}
-        
+
         session = self.active_sessions[session_id]
         actual_mole = session.get("mole")
         detected_mole = session.get("detected_mole")
-        
+
         if detected_mole is None:
-            outcome = "BUSTED"
+            outcome = GameOutcome.BUSTED.value
             message = "No mole detected - heist failed!"
+            self.game_stats["busted_games"] += 1
         elif detected_mole == actual_mole:
-            outcome = "SUCCESS"
+            outcome = GameOutcome.SUCCESS.value
             message = f"Correct! {detected_mole} was the mole - heist succeeded!"
+            self.game_stats["successful_detections"] += 1
         else:
-            outcome = "FAILURE"
+            outcome = GameOutcome.FAILURE.value
             message = f"Wrong! {detected_mole} is innocent. The real mole {actual_mole} sabotaged the heist!"
-        
+            self.game_stats["failed_detections"] += 1
+
         session["game_outcome"] = outcome
-        
+        self.game_stats["total_games"] += 1
+
+        # Calculate sabotage score
+        sabotage_events = session.get("sabotage_events", [])
+        sabotage_score = sum(e.get("severity", 0) for e in sabotage_events)
+
         return {
             "success": True,
             "session_id": session_id,
             "outcome": outcome,
             "message": message,
             "actual_mole": actual_mole,
-            "detected_mole": detected_mole
+            "detected_mole": detected_mole,
+            "sabotage_events": sabotage_events,
+            "sabotage_score": sabotage_score
+        }
+
+    def get_game_stats(self) -> Dict:
+        """Hole Statistiken über alle gespielten Games."""
+        total_games = self.game_stats["total_games"]
+        if total_games == 0:
+            return {
+                "total_games": 0,
+                "successful_detections": 0,
+                "failed_detections": 0,
+                "busted_games": 0,
+                "success_rate": 0.0,
+                "average_sabotage_events": 0.0
+            }
+
+        # Calculate average sabotage events
+        completed_sessions = [
+            s for s in self.active_sessions.values()
+            if s.get("game_outcome") is not None
+        ]
+        total_sabotage_events = sum(
+            len(s.get("sabotage_events", []))
+            for s in completed_sessions
+        )
+
+        return {
+            "total_games": total_games,
+            "successful_detections": self.game_stats["successful_detections"],
+            "failed_detections": self.game_stats["failed_detections"],
+            "busted_games": self.game_stats["busted_games"],
+            "success_rate": self.game_stats["successful_detections"] / total_games if total_games > 0 else 0.0,
+            "average_sabotage_events": total_sabotage_events / len(completed_sessions) if completed_sessions else 0.0,
+            "sabotage_patterns": {
+                pattern.value: sum(
+                    1 for s in self.active_sessions.values()
+                    if s.get("sabotage_pattern") == pattern.value
+                )
+                for pattern in SabotagePattern
+            }
         }
 
 
@@ -282,21 +491,46 @@ if __name__ == "__main__":
     controller = HeistController()
 
     print("=" * 80)
-    print("Day 20: Heist Controller Demo")
+    print("Day 20+21: Heist Controller with Mole Game Demo")
     print("=" * 80)
 
-    # Start session
+    # Start session with Tag 21 Mole Game
     result = controller.start_session(
         session_id="demo_heist_001",
-        agents=["planner", "hacker", "safecracker", "mole"],
+        agents=["planner", "hacker", "safecracker", "getaway_driver"],
         config={"difficulty": "hard"}
     )
-    print(f"\n✅ Session started: {result}")
+    print(f"\n✅ Session started:")
+    print(f"   Agents: {result['agents']}")
+    print(f"   Mole Selected: {result['mole_selected']}")
+    print(f"   Sabotage Pattern: {result['sabotage_pattern']}")
+
+    # Get sabotage instructions for the mole
+    session = controller.get_session_status("demo_heist_001")
+    mole_agent = session["mole"]
+    instructions = controller.get_sabotage_instructions("demo_heist_001", mole_agent)
+    print(f"\n🎭 Mole is: {mole_agent}")
+    print(f"   Instructions Preview: {instructions[:100]}...")
 
     # Send commands
     controller.send_command("demo_heist_001", "hacker", "Disable camera 3")
     controller.send_command("demo_heist_001", "safecracker", "Check vault mechanism")
     print(f"\n📋 Commands sent")
+
+    # Record sabotage events
+    controller.record_sabotage_event(
+        "demo_heist_001",
+        "timing_error",
+        f"{mole_agent} gave wrong vault timing",
+        0.8
+    )
+    controller.record_sabotage_event(
+        "demo_heist_001",
+        "false_info",
+        f"{mole_agent} claimed cameras were disabled",
+        0.9
+    )
+    print(f"\n⚠️  Recorded 2 sabotage events")
 
     # Get pending commands
     pending = controller.get_pending_commands("demo_heist_001")
@@ -312,10 +546,24 @@ if __name__ == "__main__":
     result = controller.resume_session("demo_heist_001")
     print(f"\n▶️  Resumed: {result}")
 
-    # Complete
-    result = controller.complete_session("demo_heist_001", success=True)
-    print(f"\n🎉 Completed: {result}")
+    # User detects mole
+    controller.set_detected_mole("demo_heist_001", "hacker")
+    print(f"\n🎯 User detected: hacker")
 
-    # Status
-    status = controller.get_session_status("demo_heist_001")
-    print(f"\n�� Final status: {json.dumps(status, indent=2)}")
+    # Evaluate detection
+    detection_result = controller.evaluate_detection("demo_heist_001")
+    print(f"\n🎮 Game Over:")
+    print(f"   {detection_result['message']}")
+    print(f"   Outcome: {detection_result['outcome']}")
+    print(f"   Sabotage Score: {detection_result['sabotage_score']}")
+
+    result = controller.complete_session("demo_heist_001", success=True)
+    print(f"\n🎉 Session Completed: {result}")
+
+
+    # Game Stats
+    stats = controller.get_game_stats()
+    print(f"\n📊 Game Statistics:")
+    print(f"   Total Games: {stats['total_games']}")
+    print(f"   Success Rate: {stats['success_rate']*100:.1f}%")
+    print(f"   Sabotage Patterns: {stats['sabotage_patterns']}")

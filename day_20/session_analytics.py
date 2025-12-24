@@ -30,25 +30,31 @@ class SessionAnalytics:
         try:
             cursor.execute("""
                 SELECT
-                    session_id,
-                    start_time,
-                    end_time,
-                    total_turns,
-                    status
-                FROM sessions
-                ORDER BY start_time DESC
+                    s.session_id,
+                    s.start_time,
+                    s.end_time,
+                    s.total_turns,
+                    s.status,
+                    COUNT(m.id) as message_count
+                FROM sessions s
+                LEFT JOIN messages m ON s.session_id = m.session_id
+                GROUP BY s.session_id
+                ORDER BY s.start_time DESC
             """)
         except sqlite3.OperationalError:
             # Fallback to num_turns if total_turns doesn't exist
             cursor.execute("""
                 SELECT
-                    session_id,
-                    start_time,
-                    end_time,
-                    num_turns,
-                    status
-                FROM sessions
-                ORDER BY start_time DESC
+                    s.session_id,
+                    s.start_time,
+                    s.end_time,
+                    s.num_turns,
+                    s.status,
+                    COUNT(m.id) as message_count
+                FROM sessions s
+                LEFT JOIN messages m ON s.session_id = m.session_id
+                GROUP BY s.session_id
+                ORDER BY s.start_time DESC
             """)
 
         sessions = []
@@ -58,7 +64,8 @@ class SessionAnalytics:
                 "start_time": row[1],
                 "end_time": row[2],
                 "total_turns": row[3],
-                "status": row[4]
+                "status": row[4],
+                "message_count": row[5]
             })
 
         conn.close()
@@ -171,13 +178,12 @@ class SessionAnalytics:
             cursor.execute("""
                 SELECT
                     tool_name,
-                    operation,
                     COUNT(*) as total_calls,
                     SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as successful_calls,
                     AVG(CASE WHEN success = 1 THEN 1.0 ELSE 0.0 END) as success_rate
                 FROM tool_usage
                 WHERE session_id = ?
-                GROUP BY tool_name, operation
+                GROUP BY tool_name
                 ORDER BY total_calls DESC
             """, (session_id,))
         else:
@@ -185,12 +191,11 @@ class SessionAnalytics:
             cursor.execute("""
                 SELECT
                     tool_name,
-                    operation,
                     COUNT(*) as total_calls,
                     SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as successful_calls,
                     AVG(CASE WHEN success = 1 THEN 1.0 ELSE 0.0 END) as success_rate
                 FROM tool_usage
-                GROUP BY tool_name, operation
+                GROUP BY tool_name
                 ORDER BY total_calls DESC
             """)
 
@@ -198,10 +203,9 @@ class SessionAnalytics:
         for row in cursor.fetchall():
             stats.append({
                 "tool_name": row[0],
-                "operation": row[1],
-                "total_calls": row[2],
-                "successful_calls": row[3],
-                "success_rate": round(row[4], 2)
+                "total_calls": row[1],
+                "successful_calls": row[2],
+                "success_rate": round(row[3], 2)
             })
 
         conn.close()
@@ -387,6 +391,37 @@ class SessionAnalytics:
             "completion_rate": round(completed_sessions / total_sessions, 2) if total_sessions > 0 else 0,
             "average_turns_per_session": round(avg_turns, 1),
             "tool_success_rates": tool_success
+        }
+
+    def get_summary_stats(self) -> Dict[str, Any]:
+        """Get summary statistics for dashboard overview."""
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        # Total sessions
+        cursor.execute("SELECT COUNT(*) FROM sessions")
+        total_sessions = cursor.fetchone()[0]
+
+        # Total messages
+        cursor.execute("SELECT COUNT(*) FROM messages")
+        total_messages = cursor.fetchone()[0]
+
+        # Total tool uses
+        cursor.execute("SELECT COUNT(*) FROM tool_usage")
+        total_tools = cursor.fetchone()[0]
+
+        # Completion rate
+        cursor.execute("SELECT COUNT(*) FROM sessions WHERE status = 'completed'")
+        completed_sessions = cursor.fetchone()[0]
+        completion_rate = round((completed_sessions / total_sessions) * 100, 1) if total_sessions > 0 else 0
+
+        conn.close()
+
+        return {
+            "total_sessions": total_sessions,
+            "total_messages": total_messages,
+            "total_tools": total_tools,
+            "completion_percentage": completion_rate
         }
 
 

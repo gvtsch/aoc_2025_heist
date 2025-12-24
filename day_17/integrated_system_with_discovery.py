@@ -32,6 +32,7 @@ class DiscoveryIntegratedAgent:
         self,
         config: AgentConfig,
         llm_client: OpenAI,
+        llm_config: Dict[str, Any],
         oauth_client: OAuthClient,
         memory_client: MemoryServiceClient,
         db_manager: DatabaseManager,
@@ -40,6 +41,7 @@ class DiscoveryIntegratedAgent:
     ):
         self.config = config
         self.llm_client = llm_client
+        self.llm_config = llm_config
         self.oauth_client = oauth_client
         self.memory_client = memory_client
         self.db_manager = db_manager
@@ -85,10 +87,10 @@ class DiscoveryIntegratedAgent:
         # Get LLM response
         try:
             response = self.llm_client.chat.completions.create(
-                model="llama-3.1-8b-instruct",
+                model=self.llm_config['model'],
                 messages=messages,
-                temperature=0.7,
-                max_tokens=500
+                temperature=self.llm_config.get('temperature', 0.7),
+                max_tokens=self.llm_config.get('max_tokens', 500)
             )
 
             message = response.choices[0].message.content
@@ -186,6 +188,7 @@ class OrchestratorWithDiscovery:
             agent = DiscoveryIntegratedAgent(
                 agent_config,
                 self.llm_client,
+                self.config.llm,
                 self.oauth_client,
                 self.memory_client,
                 self.db_manager,

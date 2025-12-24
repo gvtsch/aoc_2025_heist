@@ -143,11 +143,13 @@ class DynamicAgent:
         self,
         config: AgentConfig,
         llm_client: OpenAI,
+        llm_config: Dict[str, Any],
         oauth_client: OAuthClient,
         tool_client: ToolClient
     ):
         self.config = config
         self.llm_client = llm_client
+        self.llm_config = llm_config
         self.oauth_client = oauth_client
         self.tool_client = tool_client
         self.oauth_token: Optional[str] = None
@@ -182,10 +184,10 @@ class DynamicAgent:
         # Get LLM response
         try:
             response = self.llm_client.chat.completions.create(
-                model="llama-3.1-8b-instruct",
+                model=self.llm_config['model'],
                 messages=messages,
-                temperature=0.7,
-                max_tokens=500
+                temperature=self.llm_config.get('temperature', 0.7),
+                max_tokens=self.llm_config.get('max_tokens', 500)
             )
 
             return response.choices[0].message.content
@@ -227,6 +229,7 @@ class DynamicAgentSystem:
             agent = DynamicAgent(
                 agent_config,
                 self.llm_client,
+                self.config.llm,
                 self.oauth_client,
                 self.tool_client
             )
