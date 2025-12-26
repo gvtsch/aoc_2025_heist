@@ -1,4 +1,15 @@
-# Day 23: Docker Consolidation - Everything in One System
+---
+title: "Day 23: Docker Consolidation - Everything in One System"
+date: 2025-12-23
+tags:
+  - python
+  - aoc
+  - adventofcode
+  - docker
+  - microservices
+  - production
+toc: true
+---
 
 All documents for this post can be found in my [repository](https://github.com/gvtsch/aoc_2025_heist/tree/main/day_23).
 
