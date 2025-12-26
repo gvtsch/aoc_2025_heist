@@ -1,5 +1,7 @@
 # Day 23: Docker Consolidation - Everything in One System
 
+All documents for this post can be found in my [repository](https://github.com/gvtsch/aoc_2025_heist/tree/main/day_23).
+
 We've been developing for 22 days now, exploring various concepts and programming in Python. Well... someone else programmed the dashboard for us.
 And today it's about making the system production-ready with Docker and starting it with just a single command.
 
