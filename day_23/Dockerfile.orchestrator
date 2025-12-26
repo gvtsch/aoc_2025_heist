@@ -1,0 +1,20 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies
+RUN pip install --no-cache-dir \
+    fastapi \
+    uvicorn \
+    openai \
+    pyyaml \
+    requests
+
+# Copy all necessary code
+COPY . /app
+
+# Create data directory
+RUN mkdir -p /app/data
+
+# Default command (can be overridden)
+CMD ["python", "-m", "day_21.heist_game"]

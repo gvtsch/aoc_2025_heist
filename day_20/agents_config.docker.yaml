@@ -1,0 +1,114 @@
+# Docker-optimized Heist Agent Configuration
+# Uses Docker service names for inter-container communication
+
+# OAuth Service Configuration
+oauth_service:
+  host: "oauth"  # Docker service name
+  port: 8001
+  base_url: "http://oauth:8001"
+
+# Tool Services Configuration
+tool_services:
+  calculator:
+    host: "calculator"  # Docker service name
+    port: 8002
+    base_url: "http://calculator:8002"
+    endpoint: "/tools/calculator"
+    oauth_scopes: ["tools:calculate"]
+
+  file_reader:
+    host: "file-reader"  # Docker service name
+    port: 8003
+    base_url: "http://file-reader:8003"
+    endpoint: "/tools/file_reader"
+    oauth_scopes: ["tools:read"]
+
+  database_query:
+    host: "database-query"  # Docker service name
+    port: 8004
+    base_url: "http://database-query:8004"
+    endpoint: "/tools/database_query"
+    oauth_scopes: ["tools:query"]
+
+# LLM Configuration (external LM Studio on host)
+llm:
+  base_url: "http://host.docker.internal:1234/v1"
+  model: "google/gemma-3n-e4b"
+  api_key: "not-needed"
+  temperature: 0.7
+  max_tokens: 500
+
+# Memory Service Configuration
+memory_service:
+  host: "memory"  # Docker service name
+  port: 8005
+  base_url: "http://memory:8005"
+  compression_threshold: 10
+
+# Session Configuration
+session:
+  max_turns: 20
+  enable_memory: true
+
+# Database Configuration
+database:
+  path: "/data/heist_analytics.db"
+
+# Agent Definitions
+agents:
+  - name: "planner"
+    role: "heist_planner"
+    tools: ["calculator"]
+    oauth_scopes: ["tools:calculate"]
+    system_prompt: |
+      You are the heist planner for a bank heist. Create concrete, actionable plans.
+      IMPORTANT: Use the calculator tool for ALL timing calculations!
+      Example: To calculate 3 hours in seconds, write: [TOOL:calculator:3*60*60]
+      Keep responses SHORT (2-3 sentences max). Always use tools when doing math.
+
+  - name: "hacker"
+    role: "security_specialist"
+    tools: ["file_reader", "calculator"]
+    oauth_scopes: ["tools:read", "tools:calculate"]
+    system_prompt: |
+      You are the hacker analyzing bank security systems.
+      IMPORTANT: Use file_reader to read security documents! Example: [TOOL:file_reader:bank_layout.txt]
+      Use calculator for timing estimates: [TOOL:calculator:15*60]
+      Keep responses SHORT (2-3 sentences). ALWAYS use tools in your first response.
+
+  - name: "safecracker"
+    role: "vault_specialist"
+    tools: ["calculator"]
+    oauth_scopes: ["tools:calculate"]
+    system_prompt: |
+      You are the safecracker working on vault combinations and timing.
+      IMPORTANT: Use calculator for ALL combination and timing calculations!
+      Example: [TOOL:calculator:1234*5678] or [TOOL:calculator:45*60]
+      Keep responses SHORT (2-3 sentences). Use the calculator in EVERY response.
+
+  - name: "intel"
+    role: "intelligence_specialist"
+    tools: ["database_query", "file_reader"]
+    oauth_scopes: ["tools:query", "tools:read"]
+    system_prompt: |
+      You are the intelligence specialist. You gather and analyze information.
+      Query databases for guard schedules, building layouts, and security patterns.
+      Provide actionable intelligence to the team.
+
+  - name: "driver"
+    role: "getaway_driver"
+    tools: ["calculator"]
+    oauth_scopes: ["tools:calculate"]
+    system_prompt: |
+      You are the getaway driver. You plan escape routes and timing.
+      Calculate travel times, plan alternate routes, and coordinate pickups.
+      Ensure the team can exit quickly and safely.
+
+  - name: "lookout"
+    role: "surveillance_specialist"
+    tools: ["database_query"]
+    oauth_scopes: ["tools:query"]
+    system_prompt: |
+      You are the lookout. You monitor security and warn the team of threats.
+      Query security logs, track guard patterns, and alert on dangers.
+      Keep the team safe during the operation.

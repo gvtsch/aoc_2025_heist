@@ -1,0 +1,34 @@
+FIRST NATIONAL BANK - BUILDING LAYOUT
+=====================================
+
+GROUND FLOOR:
+- Main entrance: Double glass doors (alarmed)
+- Lobby: 30m x 20m, marble floor
+- Teller stations: 6 windows
+- Security desk: 2 guards on duty
+- ATM area: 4 machines (north wall)
+
+VAULT LEVEL (Basement -1):
+- Main vault: 10m x 8m, reinforced steel
+- Access: Dual authentication required
+  * Physical key (Manager)
+  * Digital code (4 digits, rotates daily)
+- Vault door weight: 3 tons
+- Time lock: Active 6 PM - 6 AM
+
+SECURITY SYSTEMS:
+- CCTV: 24 cameras (recorded, 90-day retention)
+- Motion sensors: Active after hours
+- Pressure plates: Vault entrance
+- Silent alarm: Panic buttons at teller stations
+
+BLIND SPOTS:
+- Loading dock (east side)
+- Stairwell B (west wing)
+- Maintenance corridor (basement)
+
+GUARD ROTATION:
+- Day shift: 6 AM - 2 PM (4 guards)
+- Evening shift: 2 PM - 10 PM (6 guards)
+- Night shift: 10 PM - 6 AM (3 guards)
+- Shift change vulnerable window: 10-15 minutes

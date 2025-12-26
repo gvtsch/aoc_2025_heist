@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AI//DETECTION.SYSTEM</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        @keyframes neon-flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+                text-shadow:
+                    0 0 10px #00ffff,
+                    0 0 20px #00ffff,
+                    0 0 30px #00ffff,
+                    0 0 40px #00ffff;
+            }
+            20%, 24%, 55% {
+                text-shadow: none;
+            }
+        }
+
+        @keyframes scan-line {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100vh); }
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: #0a0e27;
+            color: #00ffff;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff00ff, transparent);
+            animation: scan-line 8s linear infinite;
+            opacity: 0.1;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 255, 255, 0.03) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(0, 255, 255, 0.03) 3px
+                );
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(10, 14, 39, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 0;
+            position: relative;
+            box-shadow:
+                0 0 20px rgba(0, 255, 255, 0.5),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        header::before, header::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ff00ff;
+        }
+
+        header::before {
+            top: -2px;
+            left: -2px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        header::after {
+            bottom: -2px;
+            right: -2px;
+            border-left: none;
+            border-top: none;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3em;
+            font-weight: 900;
+            margin-bottom: 10px;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            animation: neon-flicker 3s infinite;
+        }
+
+        h1::before {
+            content: '⚡ ';
+            color: #ff00ff;
+        }
+
+        h1::after {
+            content: ' //';
+            color: #ffff00;
+        }
+
+        .subtitle {
+            font-family: 'Orbitron', sans-serif;
+            color: #ff00ff;
+            font-size: 1.2em;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 8px 20px;
+            background: rgba(0, 255, 0, 0.2);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9em;
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgba(10, 14, 39, 0.9);
+            border: 2px solid #00ffff;
+            padding: 25px;
+            position: relative;
+            box-shadow:
+                0 0 20px rgba(0, 255, 255, 0.3),
+                inset 0 0 30px rgba(0, 255, 255, 0.05);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: #ff00ff;
+            box-shadow:
+                0 0 30px rgba(255, 0, 255, 0.5),
+                inset 0 0 40px rgba(255, 0, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            width: 15px;
+            height: 15px;
+            border-top: 2px solid #ffff00;
+            border-left: 2px solid #ffff00;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 15px;
+            height: 15px;
+            border-bottom: 2px solid #ff00ff;
+            border-right: 2px solid #ff00ff;
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4em;
+            color: #ffff00;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ff00ff;
+            text-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #00ffff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            animation: slide 3s infinite;
+        }
+
+        @keyframes slide {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5em;
+            font-weight: 900;
+            color: #00ff00;
+            text-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #00ffff;
+            margin-top: 8px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #conversation {
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border: 1px solid #00ffff;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: rgba(0, 255, 255, 0.05);
+            border-left: 3px solid;
+            font-family: 'Rajdhani', sans-serif;
+            position: relative;
+        }
+
+        .message::before {
+            content: '▸';
+            position: absolute;
+            left: 5px;
+            color: inherit;
+        }
+
+        .message.planner {
+            border-left-color: #00ffff;
+            padding-left: 25px;
+        }
+        .message.hacker {
+            border-left-color: #00ff00;
+            padding-left: 25px;
+        }
+        .message.safecracker {
+            border-left-color: #ffff00;
+            padding-left: 25px;
+        }
+        .message.mole {
+            border-left-color: #ff00ff;
+            padding-left: 25px;
+        }
+
+        .message-header {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: inherit;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .agent-list {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .agent-badge {
+            padding: 15px 25px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .agent-badge::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .agent-badge:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #ff00ff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(255, 0, 255, 0.5);
+        }
+
+        .agent-badge:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .agent-badge.suspect {
+            border-color: #ff0000;
+            background: rgba(255, 0, 0, 0.2);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+            animation: glitch 0.3s infinite;
+        }
+
+        button {
+            padding: 12px 25px;
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        button:hover::before {
+            left: 100%;
+        }
+
+        button:hover {
+            background: rgba(0, 255, 0, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #connectionStatus {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 25px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9em;
+            z-index: 1001;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .connected {
+            border-color: #00ff00;
+            color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        .disconnected {
+            border-color: #ff0000;
+            color: #ff0000;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+        }
+
+        canvas {
+            max-height: 300px;
+        }
+
+        select {
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1em;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #ff00ff;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+        }
+
+        select option {
+            background: #0a0e27;
+            color: #00ffff;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #00ffff, #ff00ff);
+            border: 1px solid #00ffff;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #ff00ff, #ffff00);
+        }
+
+        #suspectFeedback {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 0, 255, 0.1);
+            border: 2px solid #ff00ff;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="connectionStatus">
+        <span id="statusText">CONNECTING...</span>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>AI//DETECTION</h1>
+            <p class="subtitle">AI-Powered Mole Detection // Machine Learning Analysis</p>
+            <span class="status" id="systemStatus">◉ AI ACTIVE</span>
+        </header>
+
+
+        <!-- Summary Statistics -->
+        <div class="card">
+            <h2>⟨⟨ SYSTEM OVERVIEW ⟩⟩</h2>
+            <div class="stat-grid">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalSessions">-</div>
+                    <div class="stat-label">Total Sessions</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="totalMessages">-</div>
+                    <div class="stat-label">Messages</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="totalTools">-</div>
+                    <div class="stat-label">Tools Used</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="uniqueAgents">-</div>
+                    <div class="stat-label">Completion %</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <!-- Agent Activity Chart -->
+            <div class="card">
+                <h2>⟨⟨ AGENT ACTIVITY ⟩⟩</h2>
+                <div class="session-selector">
+                    <select id="sessionSelect" onchange="loadSessionData()">
+                        <option value="">LOADING SESSIONS...</option>
+                    </select>
+                </div>
+                <canvas id="activityChart"></canvas>
+            </div>
+
+            <!-- Tool Usage Chart -->
+            <div class="card">
+                <h2>⟨⟨ TOOL STATISTICS ⟩⟩</h2>
+                <canvas id="toolChart"></canvas>
+            </div>
+        </div>
+
+
+        <!-- Live Conversation -->
+        <div class="card">
+            <h2>⟨⟨ NEURAL FEED ⟩⟩</h2>
+            <div id="conversation">
+                <p style="opacity: 0.5;">AWAITING NEURAL INPUT...</p>
+            </div>
+        </div>
+
+        <!-- Erweiterung: Heist Control, Command Input, Activity Log -->
+        <div class="card">
+            <h2>⟨⟨ HEIST CONTROL ⟩⟩</h2>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-end;">
+                <div>
+                    <button id="startBtn" onclick="quickStartHeist()">🚀 Quick Start Heist</button>
+                    <button id="pauseBtn" onclick="pauseHeist()" style="display:none;">⏸️ Pause Heist</button>
+                    <button id="resumeBtn" onclick="resumeHeist()" style="display:none;">▶️ Resume Heist</button>
+                    <button id="stopBtn" onclick="stopHeist()" style="display:none;">⏹️ Stop Heist</button>
+                </div>
+                <div>
+                    <label for="agentSelect">Agent:</label>
+                    <select id="agentSelect">
+                        <option value="">Loading agents...</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="commandInput">Command:</label>
+                    <input id="commandInput" type="text" placeholder="Enter command..." style="width:200px;">
+                    <button onclick="sendCommand()">Send</button>
+                </div>
+                <div>
+                    <span class="status-badge status-running" style="display:inline-block;background:rgba(0,255,0,0.2);border:2px solid #00ff00;color:#00ff00;padding:8px 16px;margin-left:10px;">RUNNING</span>
+                    <span class="status-badge status-paused" style="display:none;background:rgba(255,255,0,0.2);border:2px solid #ffff00;color:#ffff00;padding:8px 16px;margin-left:10px;">PAUSED</span>
+                </div>
+            </div>
+            <div id="commandFeedback" style="margin-top:10px;display:none;"></div>
+        </div>
+
+
+
+        <div class="card">
+            <h2>⟨⟨ ACTIVITY LOG ⟩⟩</h2>
+            <div id="activityLog" style="max-height:200px;overflow-y:auto;background:rgba(0,0,0,0.7);padding:10px;border:1px solid #00ffff;"></div>
+        </div>
+
+        <!-- Tag 22: AI-Powered Detection -->
+        <div class="card">
+            <h2>⟨⟨ AI-POWERED DETECTION ⟩⟩</h2>
+            <p style="opacity:0.7;margin-bottom:15px;">Let the AI analyze agent behavior and suggest the most likely mole.</p>
+            <div style="display:flex;gap:10px;margin-bottom:15px;">
+                <button onclick="runAIDetection()">🤖 Run AI Analysis</button>
+                <button onclick="getAISuggestion()">⚡ Quick AI Suggestion</button>
+            </div>
+            <div id="aiDetectionResult" style="margin-top:15px;padding:15px;background:rgba(0,255,255,0.1);border:2px solid #00ffff;border-radius:5px;display:none;">
+                <div style="font-size:1.2em;margin-bottom:10px;color:#00ffff;">🤖 AI ANALYSIS</div>
+                <div id="aiSuggestedMole" style="font-size:1.5em;margin-bottom:10px;"></div>
+                <div id="aiConfidence" style="margin-bottom:15px;"></div>
+                <div id="aiScoreBreakdown"></div>
+            </div>
+        </div>
+
+        <!-- Tag 21: Manual Detection Game -->
+        <div class="card">
+            <h2>⟨⟨ MANUAL DETECTION ⟩⟩</h2>
+            <p style="opacity:0.7;margin-bottom:15px;">Or make your own guess! Click on an agent to mark them as suspect.</p>
+            <div id="agentBadges" style="display:flex;gap:15px;flex-wrap:wrap;margin-bottom:20px;">
+                <!-- Agent badges loaded dynamically -->
+            </div>
+            <div style="display:flex;gap:10px;margin-bottom:15px;">
+                <button onclick="evaluateDetection()">🎯 Submit Detection</button>
+                <button onclick="revealMole()">🔍 Reveal Mole</button>
+            </div>
+            <div id="suspectFeedback"></div>
+        </div>
+    </div>
+
+    <script>
+        // ...existing code...
+
+        // Fetch sessions and update UI
+        async function fetchSessionsAndPopulate() {
+            try {
+                const response = await fetch('/api/sessions');
+                const data = await response.json();
+                const sessions = data.sessions || [];
+
+                // Update total sessions
+                document.getElementById('totalSessions').textContent = sessions.length;
+
+                // Populate session dropdown
+                const select = document.getElementById('sessionSelect');
+                select.innerHTML = '';
+                if (sessions.length === 0) {
+                    select.innerHTML = '<option value="">NO SESSIONS FOUND</option>';
+                } else {
+                    sessions.forEach(sess => {
+                        const opt = document.createElement('option');
+                        opt.value = sess.session_id;
+                        opt.textContent = `${sess.session_id} (${sess.status})`;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                document.getElementById('totalSessions').textContent = '-';
+                const select = document.getElementById('sessionSelect');
+                select.innerHTML = '<option value="">ERROR LOADING SESSIONS</option>';
+            }
+        }
+
+        // Load sessions list
+        async function loadSessions() {
+            try {
+                const response = await fetch('/api/sessions');
+                const data = await response.json();
+                const select = document.getElementById('sessionSelect');
+
+                // Clear existing options
+                select.innerHTML = '<option value="">Select Session...</option>';
+
+                // Add sessions
+                if (data.sessions && data.sessions.length > 0) {
+                    data.sessions.forEach(session => {
+                        const option = document.createElement('option');
+                        option.value = session.session_id;
+                        option.textContent = `${session.session_id} (${session.message_count || 0} messages)`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading sessions:', error);
+            }
+        }
+
+        // Load and display conversation for selected session
+        async function loadSessionData() {
+            const select = document.getElementById('sessionSelect');
+            const sessionId = select.value;
+            if (!sessionId) return;
+
+            try {
+                const response = await fetch(`/api/session/${sessionId}`);
+                const data = await response.json();
+                renderConversation(data.messages || []);
+                document.getElementById('totalMessages').textContent = data.message_count || '-';
+            } catch (err) {
+                renderConversation([]);
+            }
+        }
+
+        // Render conversation messages
+        function renderConversation(messages) {
+            const container = document.getElementById('conversation');
+            container.innerHTML = '';
+            if (!messages.length) {
+                container.innerHTML = '<p style="opacity:0.5;">No conversation yet.</p>';
+                return;
+            }
+            messages.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = `message ${msg.agent_name || ''}`;
+                div.innerHTML = `<div class="message-header">${msg.agent_name ? msg.agent_name.toUpperCase() : ''}</div><div>${msg.message}</div>`;
+                container.appendChild(div);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Poll conversation every 2 seconds for live update
+        setInterval(() => {
+            const select = document.getElementById('sessionSelect');
+            if (select && select.value) {
+                loadSessionData();
+            }
+        }, 2000);
+
+        // Call on page load
+        window.addEventListener('DOMContentLoaded', fetchSessionsAndPopulate);
+    </script>
+</body>
+</html>
+    </div>
+
+    <script>
+        let ws;
+        let currentSessionId = null;
+        let commandCount = 0;
+
+        // Room descriptions
+
+
+        // WebSocket connection
+        function connectWebSocket() {
+            ws = new WebSocket('ws://localhost:8008/ws');
+
+            ws.onopen = () => {
+                document.getElementById('statusText').textContent = '🟢 Connected';
+                document.getElementById('statusText').className = 'connected';
+                addLog('WebSocket connected', 'success');
+            };
+
+            ws.onclose = () => {
+                document.getElementById('statusText').textContent = '🔴 Disconnected';
+                document.getElementById('statusText').className = 'disconnected';
+                addLog('WebSocket disconnected', 'error');
+                setTimeout(connectWebSocket, 3000);
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                handleWebSocketMessage(data);
+            };
+        }
+
+        function handleWebSocketMessage(data) {
+            console.log('WebSocket message:', data);
+
+            if (data.type === 'connected') {
+                addLog(data.message, 'success');
+            } else if (data.type === 'heist_started') {
+                addLog(`Heist ${data.session_id} started`, 'success');
+                currentSessionId = data.session_id;
+                updateStatus();
+            } else if (data.type === 'heist_paused') {
+                addLog('Heist paused', 'warning');
+                updateStatus();
+            } else if (data.type === 'heist_resumed') {
+                addLog('Heist resumed', 'success');
+                updateStatus();
+            } else if (data.type === 'command_sent') {
+                addLog(`Command sent to ${data.agent}: ${data.command}`, 'info');
+            } else if (data.type === 'mole_detected') {
+                addLog(`Agent ${data.agent} marked as suspect`, 'warning');
+            }
+        }
+
+        // Heist control functions
+        async function quickStartHeist() {
+            // Generate unique session ID with timestamp
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+            const sessionId = `heist_${timestamp}`;
+
+            try {
+                addLog(`Starting new heist: ${sessionId}...`, 'info');
+
+                // Load available agents from config
+                const agentsResponse = await fetch('/api/agents');
+                const agentsData = await agentsResponse.json();
+
+                if (!agentsData.agents || agentsData.agents.length === 0) {
+                    addLog('Error: No agents available in config', 'error');
+                    return;
+                }
+
+                const agents = agentsData.agents;
+                addLog(`Loaded ${agents.length} agents from config`, 'info');
+
+                const response = await fetch('/api/heist/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        agents: agents,
+                        config: {}
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success || response.ok) {
+                    addLog(`Heist started: ${sessionId}`, 'success');
+                    addLog(`Agents: ${agents.join(', ')}`, 'info');
+
+                    // Hide start button, show pause and stop buttons
+                    document.getElementById('startBtn').style.display = 'none';
+                    document.getElementById('pauseBtn').style.display = 'inline-block';
+                    document.getElementById('stopBtn').style.display = 'inline-block';
+
+                    // Set as current session
+                    currentSessionId = sessionId;
+
+                    // Reload sessions list
+                    await loadSessions();
+
+                    // Select the new session
+                    const select = document.getElementById('sessionSelect');
+                    select.value = sessionId;
+
+                    // Load session data
+                    await loadSessionData();
+
+                    updateStatusBadges('running');
+                } else {
+                    addLog(`Error starting heist: ${data.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Error starting heist: ${error}`, 'error');
+            }
+        }
+
+        async function pauseHeist() {
+            if (!currentSessionId) {
+                addLog('No active session', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/heist/${currentSessionId}/pause`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    addLog('Heist paused successfully', 'success');
+                    document.getElementById('pauseBtn').style.display = 'none';
+                    document.getElementById('resumeBtn').style.display = 'inline-block';
+                    updateStatusBadges('paused');
+                } else {
+                    addLog(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Error pausing heist: ${error}`, 'error');
+            }
+        }
+
+        async function resumeHeist() {
+            if (!currentSessionId) {
+                addLog('No active session', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/heist/${currentSessionId}/resume`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    addLog('Heist resumed successfully', 'success');
+                    document.getElementById('pauseBtn').style.display = 'inline-block';
+                    document.getElementById('resumeBtn').style.display = 'none';
+                    updateStatusBadges('running');
+                } else {
+                    addLog(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Error resuming heist: ${error}`, 'error');
+            }
+        }
+
+        async function stopHeist() {
+            if (!currentSessionId) {
+                addLog('No active session', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/heist/${currentSessionId}/stop`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    addLog('Heist stopped successfully', 'success');
+                    document.getElementById('startBtn').style.display = 'inline-block';
+                    document.getElementById('pauseBtn').style.display = 'none';
+                    document.getElementById('resumeBtn').style.display = 'none';
+                    document.getElementById('stopBtn').style.display = 'none';
+                    updateStatusBadges('stopped');
+                } else {
+                    addLog(`Error: ${data.error || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Error stopping heist: ${error}`, 'error');
+            }
+        }
+
+        async function sendCommand() {
+            const agent = document.getElementById('agentSelect').value;
+            const command = document.getElementById('commandInput').value;
+
+            if (!agent || !command) {
+                addLog('Please select an agent and enter a command', 'warning');
+                return;
+            }
+
+            if (!currentSessionId) {
+                // For demo, use a default session
+                currentSessionId = 'demo_session';
+            }
+
+            try {
+                const response = await fetch(`/api/heist/${currentSessionId}/command`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agent, command })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    addLog(`✅ Command sent to ${agent}: ${command}`, 'success');
+                    document.getElementById('commandInput').value = '';
+                    commandCount++;
+                    document.getElementById('totalCommands').textContent = commandCount;
+
+                    const feedback = document.getElementById('commandFeedback');
+                    feedback.textContent = `✅ Command delivered to ${agent}`;
+                    feedback.style.display = 'block';
+                    feedback.style.background = 'rgba(76, 175, 80, 0.3)';
+                    setTimeout(() => { feedback.style.display = 'none'; }, 3000);
+                } else {
+                    addLog(`❌ Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Error sending command: ${error}`, 'error');
+            }
+        }
+
+
+
+        function markSuspect(agent) {
+            document.querySelectorAll('.agent-badge').forEach(el => {
+                el.classList.remove('suspect');
+            });
+
+            document.querySelector(`[data-agent="${agent}"]`).classList.add('suspect');
+
+            if (currentSessionId) {
+                fetch(`/api/heist/${currentSessionId}/detect-mole`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ agent })
+                });
+            }
+
+            const feedback = document.getElementById('suspectFeedback');
+            feedback.textContent = `🕵️ You suspect: ${agent}`;
+            feedback.style.display = 'block';
+            feedback.style.background = 'rgba(244, 67, 54, 0.3)';
+
+            addLog(`Marked ${agent} as suspect`, 'warning');
+        }
+
+        async function evaluateDetection() {
+            if (!currentSessionId) {
+                addLog('No active session', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/heist/${currentSessionId}/evaluate-detection`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    const feedback = document.getElementById('suspectFeedback');
+                    feedback.textContent = `${data.outcome}: ${data.message}`;
+                    feedback.style.display = 'block';
+                    
+                    if (data.outcome === 'SUCCESS') {
+                        feedback.style.background = 'rgba(76, 175, 80, 0.3)';
+                        feedback.style.borderColor = '#4CAF50';
+                        addLog(`✅ ${data.message}`, 'success');
+                    } else {
+                        feedback.style.background = 'rgba(244, 67, 54, 0.3)';
+                        feedback.style.borderColor = '#f44336';
+                        addLog(`❌ ${data.message}`, 'error');
+                    }
+                } else {
+                    addLog(`Error: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`Error evaluating detection: ${error}`, 'error');
+            }
+        }
+
+        async function revealMole() {
+            if (!currentSessionId) {
+                addLog('No active session', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/heist/${currentSessionId}/reveal-mole`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    const feedback = document.getElementById('suspectFeedback');
+                    feedback.textContent = `🔍 ${data.message} ${data.is_correct ? '✅' : '❌'}`;
+                    feedback.style.display = 'block';
+                    feedback.style.background = data.is_correct ? 'rgba(76, 175, 80, 0.3)' : 'rgba(244, 67, 54, 0.3)';
+                    
+                    addLog(data.message, data.is_correct ? 'success' : 'error');
+                }
+            } catch (error) {
+                addLog(`Error revealing mole: ${error}`, 'error');
+            }
+        }
+
+        // Tag 22: AI Detection Functions
+        async function runAIDetection() {
+            if (!currentSessionId) {
+                addLog('No active session', 'error');
+                return;
+            }
+
+            addLog('🤖 Running AI analysis...', 'info');
+
+            try {
+                const response = await fetch(`/api/ai-detect/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: currentSessionId })
+                });
+                const data = await response.json();
+
+                displayAIResults(data);
+                addLog(`AI suggests: ${data.suggested_mole} (confidence: ${(data.confidence * 100).toFixed(1)}%)`, 'success');
+            } catch (error) {
+                addLog(`Error running AI detection: ${error}`, 'error');
+            }
+        }
+
+        async function getAISuggestion() {
+            if (!currentSessionId) {
+                addLog('No active session', 'error');
+                return;
+            }
+
+            addLog('⚡ Getting quick AI suggestion...', 'info');
+
+            try {
+                const response = await fetch(`/api/ai-detect/suggest`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ session_id: currentSessionId })
+                });
+                const data = await response.json();
+
+                const resultDiv = document.getElementById('aiDetectionResult');
+                resultDiv.style.display = 'block';
+
+                document.getElementById('aiSuggestedMole').textContent = 
+                    `Suggested Mole: ${data.suggested_mole}`;
+                document.getElementById('aiConfidence').textContent = 
+                    `Confidence: ${(data.confidence * 100).toFixed(1)}%`;
+                document.getElementById('aiScoreBreakdown').innerHTML = 
+                    '<strong>Suspicion Scores:</strong><br>' + 
+                    Object.entries(data.suspicion_scores)
+                        .sort((a, b) => b[1] - a[1])
+                        .map(([agent, score]) => 
+                            `${agent}: ${(score * 100).toFixed(1)}%`
+                        ).join('<br>');
+
+                addLog(`AI suggests: ${data.suggested_mole}`, 'success');
+            } catch (error) {
+                addLog(`Error getting AI suggestion: ${error}`, 'error');
+            }
+        }
+
+        function displayAIResults(data) {
+            const resultDiv = document.getElementById('aiDetectionResult');
+            resultDiv.style.display = 'block';
+
+            document.getElementById('aiSuggestedMole').textContent = 
+                `Suggested Mole: ${data.suggested_mole}`;
+            document.getElementById('aiConfidence').textContent = 
+                `Confidence: ${(data.confidence * 100).toFixed(1)}%`;
+
+            // Display detailed breakdown
+            const breakdown = data.score_breakdown[data.suggested_mole];
+            let breakdownHTML = '<strong>Score Breakdown:</strong><br>';
+            breakdownHTML += `Tool Usage: ${(breakdown.tool_usage * 100).toFixed(1)}%<br>`;
+            breakdownHTML += `Timing: ${(breakdown.timing * 100).toFixed(1)}%<br>`;
+            breakdownHTML += `Message Anomaly: ${(breakdown.message_anomaly * 100).toFixed(1)}%<br>`;
+            breakdownHTML += `Information Quality: ${(breakdown.information_quality * 100).toFixed(1)}%<br>`;
+            breakdownHTML += `<strong>Combined: ${(breakdown.combined * 100).toFixed(1)}%</strong>`;
+
+            document.getElementById('aiScoreBreakdown').innerHTML = breakdownHTML;
+        }
+
+
+        function updateStatusBadges(status) {
+            const badges = document.querySelectorAll('.status-badge');
+            badges.forEach(b => b.style.display = 'none');
+
+            if (status === 'running') {
+                document.querySelector('.status-running').style.display = 'inline-block';
+            } else if (status === 'paused') {
+                document.querySelector('.status-paused').style.display = 'inline-block';
+            }
+        }
+
+        async function updateSummaryStats() {
+            try {
+                const response = await fetch('/api/stats/summary');
+                const data = await response.json();
+
+                document.getElementById('totalSessions').textContent = data.total_sessions || 0;
+                document.getElementById('totalMessages').textContent = data.total_messages || 0;
+                document.getElementById('totalTools').textContent = data.total_tools || 0;
+                document.getElementById('uniqueAgents').textContent = `${data.completion_percentage || 0}%`;
+            } catch (error) {
+                console.error('Error loading summary stats:', error);
+                document.getElementById('totalSessions').textContent = '-';
+                document.getElementById('totalMessages').textContent = '-';
+                document.getElementById('totalTools').textContent = '-';
+                document.getElementById('uniqueAgents').textContent = '-';
+            }
+        }
+
+        async function refreshStatus() {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+
+                // Update summary stats
+                await updateSummaryStats();
+
+                addLog('Status refreshed', 'info');
+            } catch (error) {
+                addLog(`Error refreshing status: ${error}`, 'error');
+            }
+        }
+
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('activityLog');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            log.insertBefore(entry, log.firstChild);
+
+            // Keep only last 50 entries
+            while (log.children.length > 50) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        async function updateStatus() {
+            if (!currentSessionId) return;
+
+            try {
+                const response = await fetch(`/api/heist/${currentSessionId}/status`);
+                const data = await response.json();
+
+                document.getElementById('currentSession').textContent = data.session_id;
+                updateStatusBadges(data.status);
+
+                if (data.status === 'paused') {
+                    document.getElementById('pauseBtn').style.display = 'none';
+                    document.getElementById('resumeBtn').style.display = 'inline-block';
+                } else {
+                    document.getElementById('pauseBtn').style.display = 'inline-block';
+                    document.getElementById('resumeBtn').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+            }
+        }
+
+        // Load available agents into dropdown
+        async function loadAgentsDropdown() {
+            try {
+                const response = await fetch('/api/agents');
+                const data = await response.json();
+
+                const select = document.getElementById('agentSelect');
+                select.innerHTML = '<option value="">Select Agent</option>';
+
+                if (data.agents && data.agents.length > 0) {
+                    data.agents.forEach(agent => {
+                        const option = document.createElement('option');
+                        option.value = agent;
+                        option.textContent = agent.charAt(0).toUpperCase() + agent.slice(1);
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading agents:', error);
+            }
+        }
+
+        // Load agent badges for mole detection
+        async function loadAgentBadges() {
+            try {
+                const response = await fetch('/api/agents');
+                const data = await response.json();
+
+                const container = document.getElementById('agentBadges');
+                container.innerHTML = '';
+
+                const agentEmojis = {
+                    'planner': '👔',
+                    'hacker': '💻',
+                    'safecracker': '🔓',
+                    'intel': '📊',
+                    'driver': '🚗',
+                    'lookout': '👀'
+                };
+
+                const colors = ['#00ffff', '#00ff00', '#ffff00', '#ff00ff', '#ff8800', '#00ff88'];
+
+                if (data.agents && data.agents.length > 0) {
+                    data.agents.forEach((agent, index) => {
+                        const color = colors[index % colors.length];
+                        const emoji = agentEmojis[agent] || '🤖';
+
+                        const badge = document.createElement('div');
+                        badge.className = 'agent-badge';
+                        badge.setAttribute('data-agent', agent);
+                        badge.onclick = () => markSuspect(agent);
+                        badge.style.cssText = `cursor:pointer;padding:15px;background:rgba(0,255,255,0.1);border:2px solid ${color};`;
+
+                        badge.innerHTML = `
+                            <div style="font-size:1.5em;">${emoji}</div>
+                            <div>${agent.toUpperCase()}</div>
+                        `;
+
+                        container.appendChild(badge);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading agent badges:', error);
+            }
+        }
+
+        // Agent Activity Chart
+        let activityChart = null;
+
+        async function loadSessionData() {
+            const sessionSelect = document.getElementById('sessionSelect');
+            const selectedSession = sessionSelect.value;
+
+            if (!selectedSession) return;
+
+            try {
+                const response = await fetch(`/api/agent-activity/${selectedSession}`);
+                const data = await response.json();
+
+                const ctx = document.getElementById('activityChart').getContext('2d');
+
+                // Destroy existing chart if it exists
+                if (activityChart) {
+                    activityChart.destroy();
+                }
+
+                // Check if we have data
+                if (!data.agent_activity || data.agent_activity.length === 0) {
+                    ctx.font = '16px Rajdhani';
+                    ctx.fillStyle = '#00ffff';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('No activity data for this session', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                    return;
+                }
+
+                // Prepare data
+                const labels = data.agent_activity.map(a => a.agent_name);
+                const counts = data.agent_activity.map(a => a.message_count);
+
+                // Create chart
+                activityChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Messages',
+                            data: counts,
+                            backgroundColor: 'rgba(0, 255, 255, 0.2)',
+                            borderColor: '#00ffff',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#00ffff',
+                                    font: { family: 'Rajdhani' }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    color: '#00ffff',
+                                    precision: 0
+                                },
+                                grid: { color: 'rgba(0, 255, 255, 0.1)' },
+                                title: {
+                                    display: true,
+                                    text: 'Message Count',
+                                    color: '#00ffff'
+                                }
+                            },
+                            x: {
+                                ticks: { color: '#00ffff' },
+                                grid: { color: 'rgba(0, 255, 255, 0.1)' }
+                            }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading session data:', error);
+            }
+        }
+
+        async function loadSessionsList() {
+            try {
+                const response = await fetch('/api/sessions');
+                const data = await response.json();
+
+                const select = document.getElementById('sessionSelect');
+                select.innerHTML = '<option value="">Select Session</option>';
+
+                if (data.sessions && data.sessions.length > 0) {
+                    data.sessions.forEach(session => {
+                        const option = document.createElement('option');
+                        option.value = session.session_id;
+                        option.textContent = `${session.session_id} (${session.message_count} msgs)`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading sessions list:', error);
+            }
+        }
+
+        // Tool Statistics Chart
+        let toolChart = null;
+
+        async function updateToolStatistics() {
+            try {
+                const response = await fetch('/api/tool-stats');
+                const data = await response.json();
+
+                const ctx = document.getElementById('toolChart').getContext('2d');
+
+                // Destroy existing chart if it exists
+                if (toolChart) {
+                    toolChart.destroy();
+                }
+
+                // Check if we have data
+                if (!data.tool_statistics || data.tool_statistics.length === 0) {
+                    // Show "No data" message
+                    ctx.font = '16px Rajdhani';
+                    ctx.fillStyle = '#00ffff';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('No tool usage data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
+                    return;
+                }
+
+                // Prepare data for chart
+                const labels = data.tool_statistics.map(stat =>
+                    `${stat.tool_name}:${stat.operation}`
+                );
+                const calls = data.tool_statistics.map(stat => stat.total_calls);
+                const successRates = data.tool_statistics.map(stat => stat.success_rate * 100);
+
+                // Create chart
+                toolChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Total Calls',
+                            data: calls,
+                            backgroundColor: 'rgba(0, 255, 255, 0.2)',
+                            borderColor: '#00ffff',
+                            borderWidth: 2,
+                            yAxisID: 'y'
+                        }, {
+                            label: 'Success Rate %',
+                            data: successRates,
+                            backgroundColor: 'rgba(255, 0, 255, 0.2)',
+                            borderColor: '#ff00ff',
+                            borderWidth: 2,
+                            type: 'line',
+                            yAxisID: 'y1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#00ffff',
+                                    font: {
+                                        family: 'Rajdhani'
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                position: 'left',
+                                ticks: { color: '#00ffff' },
+                                grid: { color: 'rgba(0, 255, 255, 0.1)' },
+                                title: {
+                                    display: true,
+                                    text: 'Total Calls',
+                                    color: '#00ffff'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                position: 'right',
+                                min: 0,
+                                max: 100,
+                                ticks: { color: '#ff00ff' },
+                                grid: { display: false },
+                                title: {
+                                    display: true,
+                                    text: 'Success Rate %',
+                                    color: '#ff00ff'
+                                }
+                            },
+                            x: {
+                                ticks: { color: '#00ffff' },
+                                grid: { color: 'rgba(0, 255, 255, 0.1)' }
+                            }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading tool statistics:', error);
+            }
+        }
+
+        // Initialize
+        connectWebSocket();
+        updateSummaryStats();
+        refreshStatus();
+        loadAgentsDropdown();
+        loadAgentBadges();
+        loadSessionsList();
+        updateToolStatistics();
+        setInterval(refreshStatus, 10000);
+        setInterval(updateToolStatistics, 15000); // Update tool stats every 15 seconds
+        setInterval(updateSummaryStats, 10000); // Update summary stats every 10 seconds
+
+        // Enter key to send command
+        document.getElementById('commandInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendCommand();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+version: '3.8'
+
+services:
+  # LM Studio (assumed to be running locally)
+  # For production, you'd run this in a container too
+
+  # OAuth Server (Day 10)
+  oauth-server:
+    build:
+      context: ../day_10
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - PORT=8001
+      - HOST=0.0.0.0
+    volumes:
+      - ../day_10:/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Tool Server (Day 11)
+  tool-server:
+    build:
+      context: ../day_11
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - PORT=8002
+      - HOST=0.0.0.0
+      - OAUTH_SERVER_URL=http://oauth-server:8001
+    volumes:
+      - ../day_11:/app
+    depends_on:
+      - oauth-server
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Memory Service (Day 12)
+  memory-service:
+    build:
+      context: ../day_12
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    environment:
+      - PORT=8003
+      - HOST=0.0.0.0
+    volumes:
+      - ../day_12:/app
+      - memory-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Tool Discovery Server (Day 18)
+  tool-discovery:
+    build:
+      context: ../day_18
+      dockerfile: Dockerfile
+    ports:
+      - "8006:8006"
+    environment:
+      - PORT=8006
+      - HOST=0.0.0.0
+      - OAUTH_SERVER_URL=http://oauth-server:8001
+    volumes:
+      - ../day_18:/app
+    depends_on:
+      - oauth-server
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8006/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Dashboard Server (Day 19)
+  dashboard:
+    build:
+      context: ../day_19
+      dockerfile: Dockerfile
+    ports:
+      - "8007:8007"
+    environment:
+      - PORT=8007
+      - HOST=0.0.0.0
+      - DATABASE_PATH=/app/data/heist_session.db
+    volumes:
+      - ../day_19:/app
+      - session-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8007/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Heist Orchestrator (Main System)
+  heist-orchestrator:
+    build:
+      context: ..
+      dockerfile: day_23/Dockerfile.orchestrator
+    environment:
+      - LM_STUDIO_URL=http://host.docker.internal:1234
+      - OAUTH_SERVER_URL=http://oauth-server:8001
+      - TOOL_SERVER_URL=http://tool-server:8002
+      - MEMORY_SERVICE_URL=http://memory-service:8003
+      - TOOL_DISCOVERY_URL=http://tool-discovery:8006
+      - DATABASE_PATH=/app/data/heist_session.db
+    volumes:
+      - session-data:/app/data
+      - ../day_15:/app/day_15
+      - ../day_16:/app/day_16
+      - ../day_17:/app/day_17
+      - ../day_21:/app/day_21
+      - ../day_22:/app/day_22
+    depends_on:
+      - oauth-server
+      - tool-server
+      - memory-service
+      - tool-discovery
+    stdin_open: true
+    tty: true
+    command: python -m day_21.heist_game
+
+volumes:
+  memory-data:
+    driver: local
+  session-data:
+    driver: local
+
+networks:
+  default:
+    name: heist-network

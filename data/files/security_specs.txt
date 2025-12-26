@@ -1,0 +1,35 @@
+SECURITY SYSTEM SPECIFICATIONS
+==============================
+
+VAULT SECURITY:
+- Manufacturer: TitanSafe Pro 5000
+- Lock Type: Time-delayed combination
+- Combination: 4-digit PIN (changes daily at 6 AM)
+- Backup access: Master key (bank manager only)
+- Time lock override: Requires 2 authorized signatures
+
+ALARM SYSTEM:
+- Provider: SecureNet Systems
+- Main panel: Located in security office
+- Backup power: 48-hour UPS battery
+- Cellular backup: AT&T network
+- Response time: 3-5 minutes (local police)
+
+CAMERA SYSTEM:
+- 24 HD cameras (1080p)
+- Recording: Continuous to NAS (Network Attached Storage)
+- Storage: 90 days rolling
+- Blind spots: Loading dock, maintenance areas
+- Night vision: Enabled on all exterior cameras
+
+ACCESS CONTROL:
+- Employee badges: RFID-enabled
+- Vault access: Dual authentication required
+- After-hours entry: Manager approval + security override
+- Door logs: All entries timestamped and recorded
+
+KNOWN VULNERABILITIES:
+- Camera blind spot at loading dock (east side)
+- 10-15 minute window during shift changes
+- Maintenance corridor has minimal coverage
+- Time lock can be bypassed with manager's physical key
